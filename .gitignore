@@ -1,0 +1,65 @@
+# =========================
+# Python / Flask
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Virtual Environments
+venv/
+.env/
+.venv/
+ENV/
+env/
+
+# Flask stuff
+instance/
+*.sqlite3
+*.db
+
+# =========================
+# Flask Migrations (keep or ignore?)
+# =========================
+# If using Flask-Migrate, you usually KEEP migrations folder
+# migrations/
+
+# =========================
+# VS Code / IDE
+# =========================
+.vscode/
+.idea/
+*.swp
+
+# =========================
+# Mac junk
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Environment files (IMPORTANT)
+# =========================
+.env
+*.env
+.env.local
+.env.production
+.env.development
+
+# =========================
+# Node (if your frontend is in same repo)
+# =========================
+node_modules/
+.next/
+out/
+dist/
