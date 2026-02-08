@@ -12,7 +12,11 @@ def start_pipeline_job():
         "error":None
     }
 
-    t = threading.Thread(target=_run,args=(job_id))
+    t = threading.Thread(
+        target=_run_pipeline_job,
+        args=(job_id,),   # ← THIS COMMA MATTERS
+        daemon=True
+    )
     t.daemon = True
     t.start()
 
@@ -21,7 +25,7 @@ def start_pipeline_job():
 
 
 
-def _run(job_id:str):
+def _run_pipeline_job(job_id:str):
     jobs[job_id]['status'] = JobStatus.RUNNING
     try:
         result = run_pipeline()
