@@ -1,23 +1,23 @@
-from flask import Blueprint,jsonify
-from app.jobs.pipeline_worker import start_pipeline_job
-from app.jobs.job_store import jobs
+from flask import Blueprint, jsonify
+from app.services.pipeline_job_service import start_pipeline_job
+from app.models.pipeline_jobs import get_job
 
-pipeline_bp = Blueprint("pipeline_bp",__name__)
+pipeline_bp = Blueprint("pipeline", __name__, url_prefix="/api/pipeline")
 
-@pipeline_bp.route("/run",methods = ["POST"])
-def run():
+@pipeline_bp.post("/run")
+def run_pipeline_route():
     job_id = start_pipeline_job()
     return jsonify({
-        "job_id":job_id,
-        "status":"started"
-    }),202
+        "job_id": job_id,
+        "status": "started"
+    }), 202
 
 
-@pipeline_bp.get('/status/<job_id>')
-def status(job_id):
-    job = jobs.get(job_id)
+@pipeline_bp.get("/status/<job_id>")
+def get_pipeline_status(job_id):
+    job = get_job(job_id)
 
     if not job:
-        return jsonify({"error":"Job not found"}),404
-    
+        return jsonify({"error": "Job not found"}), 404
+
     return jsonify(job)
