@@ -3,6 +3,10 @@ from app.services.scraper import scrape_article
 from app.services.text_cleaner import clean_text
 
 
+MIN_RAW_LEN = 300
+MIN_CLEAN_LEN = 200
+
+
 def scrape_and_store(source_id: str, url: str):
     result = scrape_article(url)
 
@@ -10,17 +14,38 @@ def scrape_and_store(source_id: str, url: str):
     content_text = None
     title = None
 
+    raw_text = None
+    clean_len = 0
+    raw_len = 0
+
     if result.get("ok"):
         raw_text = result.get("text")
         title = result.get("title")
 
-        if raw_text and len(raw_text) > 300:
-            content_text = clean_text(raw_text)
-            status = "success"
+        raw_len = len(raw_text) if raw_text else 0
+
+        if raw_text and raw_len >= MIN_RAW_LEN:
+            cleaned = clean_text(raw_text)
+            clean_len = len(cleaned) if cleaned else 0
+
+            if cleaned and clean_len >= MIN_CLEAN_LEN:
+                content_text = cleaned
+                status = "success"
+            else:
+                status = "failed"
         else:
             status = "failed"
     else:
         status = result.get("reason", "failed")
+
+    # 🔍 DEBUG LOG (keep this until stable)
+    print({
+        "source_id": source_id,
+        "url": url,
+        "raw_len": raw_len,
+        "clean_len": clean_len,
+        "status": status
+    })
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -28,12 +53,18 @@ def scrape_and_store(source_id: str, url: str):
     cursor.execute("""
         UPDATE sources
         SET title = COALESCE(%s, title),
-            content_text = COALESCE(%s, content_text),
+            content_text = %s,
             scrape_status = %s,
             scraped_at = NOW()
         WHERE id = %s;
-    """, (title, content_text, status, source_id))
+    """, (
+        title,
+        content_text,   # ← overwrite so failures are visible
+        status,
+        source_id
+    ))
 
+    # fetch related topic nodes (optional, but fine)
     cursor.execute("""
         SELECT topic_node_id
         FROM topic_sources
@@ -47,8 +78,10 @@ def scrape_and_store(source_id: str, url: str):
 
     return {
         "source_id": source_id,
-        "topic_node_ids": topic_node_ids,
         "url": url,
         "status": status,
-        "title": title
+        "raw_length": raw_len,
+        "clean_length": clean_len,
+        "title": title,
+        "topic_node_ids": topic_node_ids
     }
