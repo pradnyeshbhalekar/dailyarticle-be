@@ -15,3 +15,5 @@ trafilatura==2.0.0
 google-genai==1.61.0
 tenacity==9.1.2
 
+ddgs
+lxml_html_clean
