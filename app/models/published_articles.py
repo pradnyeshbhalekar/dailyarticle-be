@@ -21,3 +21,40 @@ def create_published_articles():
     conn.commit()
     close_connection(conn)
     print("published_articles created")
+
+def publish_article(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+          INSERT INTO published_articles(
+                   candidate_id,
+                   topic_node_id,
+                   title,
+                   slug,
+                   article_md,
+                   diagram,published_by
+                   ) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id;
+                   """,(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id))
+    conn.commit()
+    close_connection(conn)
+
+def get_published_by_slug(slug):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+          SELECT * FROM published_articles WHERE SLUG =%s
+                   """,(slug,))    
+    row = cursor.fetchone()
+    close_connection(conn)
+    return row
+
+
+def get_published_by_id(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+          SELECT * FROM published_articles WHERE id=%s
+     """,(id,))
+    row = cursor.fetchone()
+    close_connection(conn)
+    return row
