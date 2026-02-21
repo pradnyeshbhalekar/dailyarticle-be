@@ -6,6 +6,7 @@ from app.services.source_scrape_service import scrape_and_store
 from app.services.topic_compiler import compile_topic
 from app.services.compiled_topic_service import save_compiled_topic
 from app.services.child_topic_service import add_child_topics
+from app.models.article_candidate import create_candidate
 
 def run_pipeline():
     topic = pick_topic()
@@ -48,7 +49,13 @@ def run_pipeline():
 
     compiled = compile_topic(topic_name, concepts)
 
-    save_compiled_topic(topic_id, compiled)
+    compiled_id = save_compiled_topic(topic_id, compiled)
+
+    candidate_id = create_candidate(
+        compiled_topic_id=compiled_id,topic_node_id=topic_id,
+        title=compiled["title"], slug=compiled["slug"],article_md=compiled["article_md"],
+        diagram=compiled.get("diagram")
+    )
 
     child_topics = compiled.get("child_topics", [])
     child_inserted = add_child_topics(topic_id, child_topics)
