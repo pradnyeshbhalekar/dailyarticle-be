@@ -8,9 +8,19 @@ from app.routes.topic_routes import topic_bp
 from app.routes.source_routes import source_bp
 from app.routes.admin_candidate_routes import admin_candidate_routes
 from app.routes.public_article_routes import public_article_routes
+from app.routes.auth_routes import auth_routes
 
 app = Flask(__name__)
-CORS(app)
+
+
+CORS(
+    app,
+    origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    supports_credentials=True
+)
 
 
 @app.route("/")
@@ -34,6 +44,7 @@ app.register_blueprint(source_bp,url_prefix='/api/sources')
 app.register_blueprint(pipeline_bp, url_prefix="/api/pipeline")
 app.register_blueprint(admin_candidate_routes,url_prefix="/api/admin/candidates")
 app.register_blueprint(public_article_routes,url_prefix='/api/articles')
+app.register_blueprint(auth_routes,url_prefix="/api/auth")
 
 
 

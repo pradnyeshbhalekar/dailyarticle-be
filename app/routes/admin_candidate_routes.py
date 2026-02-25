@@ -1,10 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, abort
 from app.models.article_candidate import list_candidates, get_candidate
 from app.services.publish_service import approve_candidate, reject_candidate
-# temp
-import os
+from app.utils.auth_middleware import require_auth
 
-ADMIN_USER_ID = os.getenv("ADMIN_USER_ID")
+
+
 
 admin_candidate_routes = Blueprint(
     "admin_candidates",
@@ -17,17 +17,22 @@ def pending_candidates():
     return jsonify(rows)
 
 
+
 @admin_candidate_routes.post("/approve/<candidate_id>")
 def approve(candidate_id):
-    # admin_user_id = request.headers.get("X-Admin-User")
-    admin_user_id = ADMIN_USER_ID
-    approve_candidate(candidate_id, admin_user_id)
-    return jsonify({"status": "approved"})
+    user = require_auth()
+    if user["role"] != "admin":
+        abort(403)
+
+    approve_candidate(candidate_id, user["user_id"])
+    return {"status": "approved"}
 
 
 @admin_candidate_routes.post("/reject/<candidate_id>")
 def reject(candidate_id):
     reason = request.json.get("reason")
-    admin_user_id = ADMIN_USER_ID
-    reject_candidate(candidate_id, reason,admin_user_id)
+    user = require_auth()
+    if user["role"] != "admin":
+        abort(403)
+    reject_candidate(candidate_id, reason,user["user_id"])
     return jsonify({"status": "rejected"})
