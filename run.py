@@ -13,24 +13,24 @@ from app.routes.auth_routes import auth_routes
 app = Flask(__name__)
 
 
-CORS(
-    app,
-    origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
-    supports_credentials=True
-)
+CORS(app, origins=['http://localhost:5173','https://looplearn-nine.vercel.app'], supports_credentials=True)
+
+@app.after_request
+def add_headers(response):
+    # Allow Google OAuth to work by not restricting opener policy
+    response.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
+    response.headers["Cross-Origin-Embedder-Policy"] = "require-corp"
+    return response
 
 
 @app.route("/")
 def home():
-    return "Flask is running ✅"
+    return "Flask is running"
 
 
 @app.route("/api/test")
 def test():
-    return jsonify({"message": "API working ✅"})
+    return jsonify({"message": "API working "})
 
 
 @app.route("/api/init-db", methods=["POST"])

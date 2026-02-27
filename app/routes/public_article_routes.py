@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from app.models.published_articles import get_published_by_slug
+from app.models.published_articles import get_published_by_slug,get_todays_published_article
 from app.utils.auth_middleware import require_auth
 
 public_article_routes = Blueprint(
@@ -9,7 +9,7 @@ public_article_routes = Blueprint(
 
 @public_article_routes.get("/<slug>")
 def get_article(slug):
-    user = require_auth()
+    # user = require_auth()
     article = get_published_by_slug(slug)
     if not article:
         return jsonify({"error": "Not found"}), 404
@@ -22,3 +22,13 @@ def get_article(slug):
         "diagram": diagram,
         "published_at": published_at
     })
+
+
+@public_article_routes.get("/today")
+def today_article():
+    user = require_auth()
+    article = get_todays_published_article()
+    if not article:
+        return jsonify({"error":"No article published today"}),404
+    
+    return jsonify(article)

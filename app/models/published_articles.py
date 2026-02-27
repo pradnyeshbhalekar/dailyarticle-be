@@ -40,16 +40,21 @@ def publish_article(candidate_id,topic_node_id,title,slug,article_md,diagram,adm
     close_connection(conn)
     return article_id
 
+
 def get_published_by_slug(slug):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-          SELECT * FROM published_articles WHERE slug =%s
-                   """,(slug,))    
-    row = cursor.fetchone()
-    close_connection(conn)
-    return row
 
+    cursor.execute("""
+        SELECT title, article_md, diagram, published_at
+        FROM published_articles
+        WHERE slug = %s
+        LIMIT 1
+    """, (slug,))
+
+    article = cursor.fetchone()
+    close_connection(conn)
+    return article
 
 def get_published_by_id(id):
     conn = get_connection()
@@ -60,3 +65,40 @@ def get_published_by_id(id):
     row = cursor.fetchone()
     close_connection(conn)
     return row
+
+def get_todays_published_article():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            pa.id,
+            pa.title,
+            pa.slug,
+            pa.article_md,
+            pa.diagram,
+            pa.published_at,
+            domain.name AS domain_name
+        FROM published_articles pa
+        JOIN concept_nodes domain
+            ON pa.topic_node_id = domain.id
+        WHERE pa.published_at::date = CURRENT_DATE
+        ORDER BY pa.published_at DESC
+        LIMIT 1;
+    """)
+
+    row = cursor.fetchone()
+    close_connection(conn)
+
+    if not row:
+        return None
+
+    return {
+        "id": row[0],
+        "title": row[1],
+        "slug": row[2],
+        "content": row[3],
+        "diagram": row[4],
+        "published_at": row[5],
+        "domain": row[6],
+    }
