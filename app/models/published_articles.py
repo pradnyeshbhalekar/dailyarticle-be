@@ -78,11 +78,24 @@ def get_todays_published_article():
             pa.article_md,
             pa.diagram,
             pa.published_at,
+
+            topic.name  AS topic_name,
             domain.name AS domain_name
+
         FROM published_articles pa
+
+        -- the topic the article is about
+        JOIN concept_nodes topic
+            ON pa.topic_node_id = topic.id
+
+        -- walk UP the graph
+        JOIN concept_edges ce
+            ON ce.to_node_id = topic.id
+
         JOIN concept_nodes domain
-            ON pa.topic_node_id = domain.id
-        WHERE pa.published_at::date = CURRENT_DATE
+            ON ce.from_node_id = domain.id
+           AND domain.node_type = 'domain'
+
         ORDER BY pa.published_at DESC
         LIMIT 1;
     """)
@@ -100,5 +113,6 @@ def get_todays_published_article():
         "content": row[3],
         "diagram": row[4],
         "published_at": row[5],
-        "domain": row[6],
+        "topic": row[6],
+        "domain": row[7],
     }
