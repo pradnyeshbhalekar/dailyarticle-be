@@ -1,5 +1,6 @@
-from flask import request,abort
+from flask import request, abort
 from app.utils.jwt_utils import decode_jwt
+from app.models.user import get_user_by_id
 
 def require_auth():
     header = request.headers.get("Authorization")
@@ -9,6 +10,20 @@ def require_auth():
     token = header.split(" ")[1]
 
     try:
-        return decode_jwt(token)
+        payload = decode_jwt(token)
     except Exception:
         abort(401)
+
+    user_id = payload.get("sub")
+    if not user_id:
+        abort(401)
+
+    user = get_user_by_id(user_id)
+    if not user:
+        abort(401)
+
+    return {
+        "user_id": user["id"],
+        "email": user["email"],
+        "role": user["role"],
+    }

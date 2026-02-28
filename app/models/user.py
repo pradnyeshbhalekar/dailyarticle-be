@@ -83,3 +83,31 @@ def get_or_create_user(email: str):
         return user_id
     finally:
         close_connection(conn)
+
+def get_user_by_id(user_id):
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT
+                u.id,
+                u.email,
+                u.is_active,
+                r.role
+            FROM users u
+            LEFT JOIN user_roles r ON r.user_id = u.id
+            WHERE u.id = %s
+        """, (user_id,))
+
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        return {
+            "user_id": row[0],
+            "email": row[1],
+            "is_active": row[2],
+            "role": row[3] or "viewer"
+        }
+    finally:
+        close_connection(conn)

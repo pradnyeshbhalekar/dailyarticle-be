@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify
 from app.models.published_articles import get_published_by_slug,get_todays_published_article
 from app.utils.auth_middleware import require_auth
+from app.utils.auth_decorators import require_admin
+
 
 public_article_routes = Blueprint(
     "public_articles",
