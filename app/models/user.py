@@ -89,7 +89,7 @@ def get_user_by_id(user_id):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT
+             SELECT
                 u.id,
                 u.email,
                 u.is_active,

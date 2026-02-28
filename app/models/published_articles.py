@@ -15,14 +15,15 @@ def create_published_article():
                    article_md TEXT NOT NULL,
                    diagram TEXT NOT NULL,
                    published_at TIMESTAMP DEFAULT NOW(),
-                   published_by UUID
+                   published_by UUID,
+                   scheduled_for DATE
                    )
                    """)
     conn.commit()
     close_connection(conn)
     print("published_articles created")
 
-def publish_article(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id):
+def publish_article(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id,publish_date):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -32,9 +33,9 @@ def publish_article(candidate_id,topic_node_id,title,slug,article_md,diagram,adm
                    title,
                    slug,
                    article_md,
-                   diagram,published_by
-                   ) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id;
-                   """,(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id))
+                   diagram,published_by,publish_date
+                   ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;
+                   """,(candidate_id,topic_node_id,title,slug,article_md,diagram,admin_user_id,publish_date))
     article_id = cursor.fetchone()[0]
     conn.commit()
     close_connection(conn)

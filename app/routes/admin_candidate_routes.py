@@ -15,7 +15,8 @@ def pending_candidates(user):
 @admin_candidate_routes.post("/approve/<candidate_id>")
 @require_admin
 def approve(user, candidate_id):
-    approve_candidate(candidate_id, user["user_id"])
+    published_date = request.json.get("publish_date")
+    approve_candidate(candidate_id, user["user_id"],published_date)
     return {"status": "approved"}
 
 
