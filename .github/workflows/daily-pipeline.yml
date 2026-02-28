@@ -2,7 +2,7 @@ name: Daily Pipeline
 
 on:
   schedule:
-    - cron: "30 14 * * *" # 8:00 PM IST (UTC+5:30)
+    - cron: "0 20 * * *" # 8:00 PM IST (UTC+5:30)
   workflow_dispatch:
 
 jobs:
